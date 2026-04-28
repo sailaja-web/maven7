@@ -1,61 +1,54 @@
-@Library('mylibrary')_
-
-
 pipeline
 {
     agent any
     stages
     {
-        stage('Download_Master')
+stage('ContinuousDownload')
         {
             steps
             {
-                script
-                {
-                    cicd.gitDownload("maven")
-                }
+              git 'https://github.com/sailaja-web/maven7.git'
             }
         }
-        stage('Build_Master')
+
+stage('ContinuousBuild')
         {
             steps
             {
-                script
-                {
-                    cicd.buildArtifact()
-                }
+              sh 'mvn package' 
             }
         }
-        stage('Deployment_Master')
+            
+stage('ContinuousDeployment')    -- this stage where deploy the tomcat which is running on QA server
         {
             steps
             {
-                script
-                {
-                    cicd.deployTomcat("DeclarativePipelinewithSharedLibraries","172.31.31.19","myapp")
-                }
-            }
+              deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: '545cd0ee-a4ac-4ebd-870d-80dc523ef754', path: '', url: 'http://172.31.20.42:8080')], contextPath: 'test1', war: '**/*.war'
+                        
+			  }
         }
-        stage('Testing_Master')
+            
+            
+stage('ContinuousTesting')
         {
             steps
             {
-                script
-                {
-                    cicd.gitDownload("FunctionalTesting")
-                    cicd.executeSelenium("DeclarativePipelinewithSharedLibraries")
-                }
+              git 'https://github.com/sailaja-web/FunctionalTesting1.git'
+              sh 'java -jar /var/lib/jenkins/workspace/DeclarativePipeline1/testing.jar'
             }
         }
-        stage('Delivery_Master')
+            
+            
+stage('ContinuousDelivery')
         {
             steps
             {
-                script
-                {
-                    cicd.deployTomcat("DeclarativePipelinewithSharedLibraries","172.31.25.180","myprodapp")
-                }
-            }
+              deploy adapters: [tomcat9(alternativeDeploymentContext: '', credentialsId: '545cd0ee-a4ac-4ebd-870d-80dc523ef754', path: '', url: 'http://172.31.30.29:8080')], contextPath: 'prod1', war: '**/*.war'
+          
+             
+	 }
+            
+        }           
+            
         }
-    }
-}
+        }
