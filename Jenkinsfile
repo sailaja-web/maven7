@@ -19,7 +19,7 @@ stage('ContinuousBuild')
             }
         }
             
-stage('ContinuousDeployment')    -- this stage where deploy the tomcat which is running on QA server
+stage('ContinuousDeployment')   
         {
             steps
             {
